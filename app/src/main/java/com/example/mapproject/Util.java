@@ -9,6 +9,7 @@ public class Util {
     public static final String Blocks = url2+"Blocks.php";
     public static final String Villages = url2+"Villages.php";
     public static final String LatLong = url2+"latlong.php";
+    public static final String getdetails = url2+"getdetails.php";
 
     /*public static final String Districts = url+"GovtOfficials/Districts.php";
     public static final String Blocks = url1+"GovtOfficials/blocks.php";

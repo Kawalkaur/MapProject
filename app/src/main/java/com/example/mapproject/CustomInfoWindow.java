@@ -11,6 +11,7 @@ import com.google.android.gms.maps.model.Marker;
 public class CustomInfoWindow implements GoogleMap.InfoWindowAdapter {
 
     private  View view;
+    TextView title;
     private LayoutInflater layoutInflater;
     private Context context;
 
@@ -29,11 +30,13 @@ public class CustomInfoWindow implements GoogleMap.InfoWindowAdapter {
 
     @Override
     public View getInfoContents(Marker marker) {
-        TextView title = (TextView) view.findViewById(R.id.winTitle);
+         title =  view.findViewById(R.id.winTitle);
         title.setText(marker.getTitle());
 
-        TextView magnitude = (TextView) view.findViewById(R.id.magnitude);
+        TextView magnitude =  view.findViewById(R.id.magnitude);
         magnitude.setText(marker.getSnippet());
         return view;
     }
+
+
 }

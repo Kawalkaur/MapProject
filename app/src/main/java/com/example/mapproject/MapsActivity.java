@@ -1,9 +1,13 @@
 package com.example.mapproject;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -26,7 +30,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMarkerClickListener {
@@ -36,7 +42,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     RequestQueue requestQueue;
     StringRequest stringRequest;
     String  getDistrict, getBlock;
+    TextView name1,name2;
+    Dialog dialog;
+    int idval;
+    String snippet;
+    int idd;
+    private AlertDialog.Builder dialogBuilder;
+    private AlertDialog adialog;
     LatLng sydney;
+    List<String> myList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,18 +122,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         double lat = Double.parseDouble(jo1.getString("Latitude"));
                         double longg = Double.parseDouble(jo1.getString("Longitude"));
                         String vill = jo1.getString("VILLAGE");
-                        String name = jo1.getString("NAME");
-                        String phone = jo1.getString("PHONE");
-                        String designation = jo1.getString("DESIGNATION");
-                        String department = jo1.getString("DEPARTMENT");
-                        String snippet  = "Name: "+name + "," +
-                                "phone: "+phone + "," +
-                                "Designation: "+designation +"," +
-                                "Department: "+department + ",";
+                         idd = jo1.getInt("ID");
+//                        String name = jo1.getString("NAME");
+//                        String phone = jo1.getString("PHONE");
+//                        String designation = jo1.getString("DESIGNATION");
+//                        String department = jo1.getString("DEPARTMENT");
+//                        String snippet  = "Name: "+name + "," +
+//                                "phone: "+phone + "," +
+//                                "Designation: "+designation +"," +
+//                                "Department: "+department + ",";
                         // count di jagah block ya village da name aa jayega
 
                         sydney = new LatLng(lat, longg);
-                        mMap.addMarker(new MarkerOptions().position(sydney).title(vill).snippet(snippet)
+                        mMap.addMarker(new MarkerOptions().position(sydney).title(vill+idd)
                                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
 
                         // Custom_info_window adapter = new Custom_info_window(MapsActivity.this);
@@ -160,6 +175,88 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onInfoWindowClick(Marker marker) {
+
+        idval = Integer.parseInt(marker.getTitle().replaceAll("[^0-9]", ""));
+        getData();
+        //Toast.makeText(this, ""+marker.getTitle().replaceAll("[^0-9]", ""), Toast.LENGTH_SHORT).show();
+
+     //  showDialouge();
+
+    }
+
+
+
+    void AlertDialog()
+    {
+
+
+    }
+
+    void getData () {
+        stringRequest = new StringRequest( Request.Method.POST, Util.getdetails, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                //Toast.makeText(MapsActivity.this, ""+response, Toast.LENGTH_SHORT).show();
+
+                try {
+                    JSONObject jo = new JSONObject(response);
+                    JSONArray ja = jo.getJSONArray("Village");
+                    myList.clear();
+
+                    for(int i =0;i<ja.length();i++)
+                    {
+                        JSONObject jo1 = ja.getJSONObject(i);
+
+                        String name = jo1.getString("Name");
+                        String phone = jo1.getString("Phone");
+                        String designation = jo1.getString("Designation");
+                        String department = jo1.getString("Department");
+                        snippet  = "Name: "+name + "," +
+                                "phone: "+phone + "," +
+                                "Designation: "+designation +"," +
+                                "Department: "+department + "\n\n";
+
+                        myList.add(snippet);
+
+                    }
+
+                    dialogBuilder = new AlertDialog.Builder(MapsActivity.this);
+                    View view = getLayoutInflater().inflate(R.layout.print_count_dialouge, null);
+                    TextView namet1 = view.findViewById(R.id.name1);
+                    namet1.setText(myList.toString().trim());
+                    dialogBuilder.setView(view);
+                    adialog = dialogBuilder.create();
+                    adialog.show();
+
+
+                    Log.w("AllDATA",myList.toString());
+
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(MapsActivity.this, "Some exception"+e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(MapsActivity.this, "Error"+error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        )
+        {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> mapi = new HashMap<>();
+                mapi.put("idd", String.valueOf(idval));
+                Log.w("IDVAL", String.valueOf(idval));
+                return mapi;
+            }
+        };
+        requestQueue.add(stringRequest);
+
 
     }
 
